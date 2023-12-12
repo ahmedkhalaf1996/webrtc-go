@@ -161,15 +161,10 @@ func main() {
 	r.GET("/create", CreateRoomRequestHandler)
 	r.GET("/join", JoinRoomRequestHandler)
 
-	// log.Println("Starting Server on Port 8000")
-	// err := router.Run(":8000")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 	r.Use(static.Serve("/", static.LocalFile("./dist", true)))
-	r.LoadHTMLFiles("index.html")
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
+	// HTML5 history mode support
+	r.NoRoute(func(c *gin.Context) {
+		c.File("./dist/index.html")
 	})
 
 	certFile := "cert.pem"

@@ -172,4 +172,11 @@ func main() {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
+	certFile := "cert.pem"
+	keyFile := "key.pem"
+
+	err := r.RunTLS(":443", certFile, keyFile)
+	if err != nil {
+		log.Fatal("Failed to start server: ", err)
+	}
 }

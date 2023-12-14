@@ -61,10 +61,23 @@ func (r *RoomMap) InsertIntoRoom(roomID string, host bool, conn *websocket.Conn)
 	r.Mutex.Lock()
 	defer r.Mutex.Unlock()
 
+	// Check if the participant is already in the room
+	for _, participant := range r.Map[roomID] {
+		if participant.Conn == conn {
+			return
+		}
+	}
+
 	p := Participant{host, conn}
 
 	log.Println("Inserting into Room with RoomID: ", roomID)
 	r.Map[roomID] = append(r.Map[roomID], p)
+
+	// Start Broadcaster only if it's not running for this room
+	if _, ok := broadcasterStatus[roomID]; !ok {
+		broadcasterStatus[roomID] = true
+		go Broadcaster(BroadcastData{RoomID: roomID})
+	}
 }
 
 // DeleteRoom deletes the room with the roomID
@@ -73,4 +86,27 @@ func (r *RoomMap) DeleteRoom(roomID string) {
 	defer r.Mutex.Unlock()
 
 	delete(r.Map, roomID)
+}
+
+// close connection
+// CloseConnection closes the connection for a participant in the given room
+func (r *RoomMap) CloseConnection(roomID string, conn *websocket.Conn) {
+	r.Mutex.Lock()
+	defer r.Mutex.Unlock()
+
+	participants, ok := r.Map[roomID]
+	if !ok {
+		return
+	}
+
+	for i, participant := range participants {
+		if participant.Conn == conn {
+			// Send a disconnect message
+			BroadcastDisconnect(roomID, conn)
+
+			// Remove the participant from the slice
+			r.Map[roomID] = append(participants[:i], participants[i+1:]...)
+			break
+		}
+	}
 }

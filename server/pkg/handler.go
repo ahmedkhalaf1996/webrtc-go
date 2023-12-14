@@ -19,6 +19,7 @@ func CreateRoomRequestHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp{RoomID: roomID})
 }
 
+// JoinRoomRequestHandler handles WebSocket connections for joining a room
 func JoinRoomRequestHandler(c *gin.Context) {
 	roomID := c.Query("roomID")
 
@@ -29,23 +30,5 @@ func JoinRoomRequestHandler(c *gin.Context) {
 	}
 
 	AllRooms.InsertIntoRoom(roomID, false, ws)
-
-	go Broadcaster()
-
-	for {
-		var msg broadcastMsg
-
-		err := ws.ReadJSON(&msg.Message)
-		if err != nil {
-			log.Println("Read Error: ", err)
-			break
-		}
-
-		msg.Client = ws
-		msg.RoomID = roomID
-
-		log.Println(msg.Message)
-
-		broadcast <- msg
-	}
+	go Broadcaster(BroadcastData{RoomID: roomID, Client: ws})
 }

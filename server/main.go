@@ -24,15 +24,15 @@ func main() {
 		c.File("./dist/index.html")
 	})
 
-	// err := r.Run(":8000")
-	// if err != nil {
-	// 	log.Fatal("Failed to start server: ", err)
-	// }
-	certFile := "cert.pem"
-	keyFile := "key.pem"
-
-	err := r.RunTLS(":443", certFile, keyFile)
+	err := r.Run(":8000")
 	if err != nil {
 		log.Fatal("Failed to start server: ", err)
 	}
+	// certFile := "cert.pem"
+	// keyFile := "key.pem"
+
+	// err := r.RunTLS(":443", certFile, keyFile)
+	// if err != nil {
+	// 	log.Fatal("Failed to start server: ", err)
+	// }
 }
